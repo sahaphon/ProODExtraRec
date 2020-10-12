@@ -19,7 +19,6 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import { BiFolderOpen } from 'react-icons/bi';
 
 const { TabPane } = Tabs;
-var _docno = '';             //เก็บ current rowID.
 
 class Recfirm extends Component
 {
@@ -562,7 +561,7 @@ class Recfirm extends Component
               <div> 
                 {this.state.recfirm.map( (v, index)=> {
 
-                  if ( _docno === v.docno)
+                  if ( row.docno === v.docno)
                   {
                       return (
                         <Steps direction="horizontal" size="small" current={v.current_pos}> 
@@ -606,13 +605,13 @@ class Recfirm extends Component
             return style;
           };
 
-          const rowEvents = {
-            //เหตุการณ์คลิก Row
-            onClick: (e, row, rowIndex) => {
-              // console.log("Rows Index --->", rowIndex)
-              _docno = row.docno;
-            }
-          };
+          // const rowEvents = {
+          //   //เหตุการณ์คลิก Row
+          //   onClick: (e, row, rowIndex) => {
+          //     // console.log("Rows Index --->", rowIndex)
+          //     _docno = row.docno;
+          //   }
+          // };
 
           //คลิกแถวที่เลือก
           const rowSelection = {
@@ -682,7 +681,7 @@ class Recfirm extends Component
                                                     columns={ columns }
                                                     expandRow={ expandRow }
                                                     rowStyle={ rowStyle }
-                                                    rowEvents={ rowEvents }
+                                                    // rowEvents={ rowEvents }  เหตุการณ์คลิก Row
                                                     pagination={paginationFactory()}
                                                     hover
                                                 />
