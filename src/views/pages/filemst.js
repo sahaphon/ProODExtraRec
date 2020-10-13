@@ -14,7 +14,8 @@ class Filemst extends Component
 
   async componentDidMount()
   {
-        const [name, pfs_id, pos] = Cookies.get("person").split("/")
+        // const [name, pfs_id, pos] = Cookies.get("person").split("/")
+
         let result = await Axios.post("http://10.32.1.169:5001/api/files")
 
         if (result.data.length !== 0) 
@@ -35,6 +36,31 @@ class Filemst extends Component
             this.setState({ data : myDt });
         }
   }
+
+  handelerDelDoc = async (id) => {
+
+
+    let result = await Axios.post("http://10.32.1.169:5001/api/delfile", { docno : id})
+
+    let myDt = [];
+    if (result.data.length !== 0) 
+    {
+
+        result.data.data && result.data.data.map(v => {
+        
+            myDt.push({
+                id : v.file_icon,
+                name : v.file_name,
+                pre_date : moment(v.pre_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pre_date).format("DD-MM-YYYY"),
+                pre_by : v.pre_by,
+                last_date : v.last_date === null ? '' : moment(v.last_date).format("DD-MM-YYYY"),
+                last_by : v.last_by,
+            })
+        })
+
+        this.setState({ data : myDt, docno: '', name : '' })
+    }
+}
 
     myColumns() 
     {
@@ -70,7 +96,7 @@ class Filemst extends Component
                 render: (record) => (
                     <div>
                         <Button color="secondary" onClick={() => this.props.history.push("/main/filemst/edit/" + record.id + '~' + record.name )}><BiEditAlt /> แก้ไข</Button>
-                        <Button color="danger" style={{ marginLeft: '6px'}}><BiTrash /> ลบ</Button>
+                        <Button color="danger" style={{ marginLeft: '6px'}} onClick={() => this.handelerDelDoc(record.id)}><BiTrash /> ลบ</Button>
                     </div>),
             }];
 

@@ -5,12 +5,12 @@ import { Table } from 'antd';
 import Axios from 'axios';
 import moment from 'moment';
 import Cookies from "js-cookie";
-import { string } from 'prop-types';
+import Sweet from 'sweetalert2';
+import { ThreeSixty } from '@material-ui/icons';
 
 class AeFiles extends Component
 {
     state = {
-        type: '',
         docno: '',
         name: '',
         data : [],
@@ -18,17 +18,17 @@ class AeFiles extends Component
  
     async componentDidMount()
     {
-        let strType = '';
+        // let strType = '';
         let strId = '';
         let strName = '';
 
         if (this.props.match.path === '/main/filemst/add')
         {
-           strType = 'ADD';
+        //    strType = 'ADD';
         }
         else
         {
-           strType = 'EDIT';
+        //    strType = 'EDIT';
            let str =  this.props.match.params.id;
            const [id, name] = str.split('~');
            strId = id;
@@ -36,7 +36,10 @@ class AeFiles extends Component
         }
 
         //Query data
-        const [name, pfs_id, pos] = Cookies.get("person").split("/")
+        // const [name, pfs_id, pos] = Cookies.get("person").split("/")
+        var fields = Cookies.get("person").split("/")
+        let name = fields[0];
+
         let result = await Axios.post("http://10.32.1.169:5001/api/files")
 
         let myDt = [];
@@ -57,7 +60,95 @@ class AeFiles extends Component
             // this.setState({ data : myDt });
         }
 
-        this.setState({ type : strType, docno: strId, name : strName, data : myDt })
+        this.setState({ docno: strId, name : strName, data : myDt })
+    }
+
+     handlerAddData = async (e) => {
+
+        if (this.state.docno === '' || this.state.name === '')
+        {
+            Sweet.fire(
+                'ผิดพลาด!',
+                'โปรดกรอกข้อมูลให้ครบ ก่อนบันทึกข้อมูล!',
+                'error'
+              )
+        }
+        else
+        {
+            var fields = Cookies.get("authorization").split(":")
+            let name = fields[0];
+            
+            let result = await Axios.post("http://10.32.1.169:5001/api/addfile", { docno : this.state.docno, name : this.state.name, user : name })
+
+            let myDt = [];
+            if (result.data.length !== 0) 
+            {
+                if (result.data.exist === true)
+                {
+                    Sweet.fire(
+                        'ผิดพลาด!',
+                        'รหัสแฟ้มข้อมูลซ้ำ โปรดกรอกระบุอย่างอื่น..',
+                        'error'
+                      )
+                }
+                else
+                {
+
+                    result.data.data && result.data.data.map(v => {
+                   
+                        myDt.push({
+                            id : v.file_icon,
+                            name : v.file_name,
+                            pre_date : moment(v.pre_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pre_date).format("DD-MM-YYYY"),
+                            pre_by : v.pre_by,
+                            last_date : v.last_date === null ? '' : moment(v.last_date).format("DD-MM-YYYY"),
+                            last_by : v.last_by,
+                        })
+                    })
+    
+                    this.setState({ data : myDt, docno: '', name : '' })
+                }
+
+            }
+        }
+    }
+
+    handlerEditData = async (e) =>
+    {
+        if (this.state.docno === '' || this.state.name === '')
+        {
+            Sweet.fire(
+                'ผิดพลาด!',
+                'โปรดกรอกข้อมูลให้ครบ ก่อนบันทึกข้อมูล!',
+                'error'
+              )
+        }
+        else
+        {
+            var fields = Cookies.get("authorization").split(":")
+            let name = fields[0];
+            
+            let result = await Axios.post("http://10.32.1.169:5001/api/updatefile", { docno : this.state.docno, name : this.state.name, user : name })
+
+            let myDt = [];
+            if (result.data.length !== 0) 
+            {
+
+                result.data.data && result.data.data.map(v => {
+                
+                    myDt.push({
+                        id : v.file_icon,
+                        name : v.file_name,
+                        pre_date : moment(v.pre_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pre_date).format("DD-MM-YYYY"),
+                        pre_by : v.pre_by,
+                        last_date : v.last_date === null ? '' : moment(v.last_date).format("DD-MM-YYYY"),
+                        last_by : v.last_by,
+                    })
+                })
+
+                this.setState({ data : myDt, docno: '', name : '' })
+            }
+        }
     }
 
     myColumns() 
@@ -105,17 +196,20 @@ class AeFiles extends Component
                                     <Label style={{ display:'flex', justifyContent:'flex-end', paddingTop:'7px', fontSize:'13px', fontWeight:'bold' }} for="exampleEmail">รหัสแฟ้ม :</Label>
                                 </Col>
                                 <Col md='1' style={{ marginTop:'3px' }} >
-                                    <Input style={{ color:'brown' }} type="custname" name="custname" id="custname" data-index='0' value={this.state.docno}/>
+                                    <Input style={{ color:'brown' }} type="id" name="id" id="id" data-index='0' value={this.state.docno} onChange={(e) => this.setState({ docno : e.target.value.toUpperCase() })}  disabled={ this.props.match.path === '/main/filemst/add' ? false : true }/>
                                 </Col>
                                 <Col md='1'>
                                     <Label style={{ display:'flex', justifyContent:'flex-end', paddingTop:'7px', fontSize:'13px', fontWeight:'bold' }} for="exampleEmail">ชื่อแฟ้ม :</Label>
                                 </Col>
                                 <Col md='3'>
-                                    <Input style={{ color:'brown' }} type="custname" name="custname" id="custname" data-index='0' value={this.state.name} />
+                                    <Input style={{ color:'brown' }} type="name" name="name" id="name" data-index='1' value={this.state.name} onChange={(e) => this.setState({ name : e.target.value})} />
                                 </Col>
                                 <Col md='6'>
-                                    <Button color="success"><BiPlusCircle /> เพิ่มข้อมูล</Button>
-                                    {/* <Button style={{ marginLeft: '5px' }} color="danger" ><BiLogOut /> ออกจากหน้าจอ</Button> */}
+                                {this.props.match.path === '/main/filemst/add' ?
+                                    <Button color="success" onClick={this.handlerAddData}><BiPlusCircle /> เพิ่มข้อมูล</Button>
+                                    :
+                                    <Button color="warning" onClick={this.handlerEditData}><BiEditAlt /> แก้ไขข้อมูล</Button>
+                                 } 
                                 </Col>
                             </Row>
                         </FormGroup>
