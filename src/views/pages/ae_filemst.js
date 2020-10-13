@@ -1,12 +1,16 @@
 import React, { Component }  from 'react'
 import {Card, CardHeader, CardBody, Col, Row, Button, Form, Input, FormGroup, Label} from "reactstrap";
 import { BiSave, BiFolderOpen, BiEditAlt, BiTrash, BiPlusCircle } from 'react-icons/bi';
-import { Table } from 'antd';
+import { Table, Checkbox } from 'antd';
 import Axios from 'axios';
 import moment from 'moment';
 import Cookies from "js-cookie";
 import Sweet from 'sweetalert2';
-import { ThreeSixty } from '@material-ui/icons';
+
+import adminPic from '../../img/Admin-60.png';
+import userPic from '../../img/users-60.png';
+import lock from '../../img/lock_red.png';
+import unlock from '../../img/unlock_green.png';
 
 class AeFiles extends Component
 {
@@ -18,49 +22,34 @@ class AeFiles extends Component
  
     async componentDidMount()
     {
-        // let strType = '';
-        let strId = '';
-        let strName = '';
-
         if (this.props.match.path === '/main/filemst/add')
         {
-        //    strType = 'ADD';
-        }
-        else
-        {
-        //    strType = 'EDIT';
-           let str =  this.props.match.params.id;
-           const [id, name] = str.split('~');
-           strId = id;
-           strName = name;
-        }
+            let result = await Axios.post("http://10.32.1.169:5001/api/getusr")
 
-        //Query data
-        // const [name, pfs_id, pos] = Cookies.get("person").split("/")
-        var fields = Cookies.get("person").split("/")
-        let name = fields[0];
-
-        let result = await Axios.post("http://10.32.1.169:5001/api/files")
-
-        let myDt = [];
-        if (result.data.length !== 0) 
-        {
-            result.data.data && result.data.data.map(v => {
-               
-                myDt.push({
-                    id : v.file_icon,
-                    name : v.file_name,
-                    pre_date : moment(v.pre_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pre_date).format("DD-MM-YYYY"),
-                    pre_by : v.pre_by,
-                    last_date : moment(v.last_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.last_date).format("DD-MM-YYYY"),
-                    last_by : v.last_by,
+            let myDt = [];
+            if (result.data.length !== 0) 
+            {
+                result.data.data && result.data.data.map(v => {
+                   
+                    myDt.push({
+                        level : v.act_user,
+                        user : v.userid,
+                        name : v.name,
+                        act_open : 0,
+                        act_view : 0,
+                        act_add : 0,
+                        act_edit : 0,
+                        act_del : 0,
+                        act_copy : 0,
+                        act_print : 0,
+                        act_other : 0,
+                    })
                 })
-            })
+            }
 
-            // this.setState({ data : myDt });
+            console.log(myDt)
+            this.setState({ data : myDt })
         }
-
-        this.setState({ docno: strId, name : strName, data : myDt })
     }
 
      handlerAddData = async (e) => {
@@ -93,7 +82,6 @@ class AeFiles extends Component
                 }
                 else
                 {
-
                     result.data.data && result.data.data.map(v => {
                    
                         myDt.push({
@@ -146,37 +134,272 @@ class AeFiles extends Component
                     })
                 })
 
+               
                 this.setState({ data : myDt, docno: '', name : '' })
             }
         }
+    }
+
+    handleClickCell = (_user, _action) => {
+
+        //วิธี setState array of objects
+        var myState = Object.assign({}, this.state);
+
+        for (var i = 0; i < myState.data.length ; i++ )
+        {
+            if (myState.data[i].user === _user)
+            {
+                if (_action === 'act_open')
+                {
+                    myState.data[i].act_open = myState.data[i].act_open === 0 ? 1 : 0
+                }
+                else if (_action === 'act_view')
+                {
+                    myState.data[i].act_view = myState.data[i].act_view === 0 ? 1 : 0
+                }
+                else if (_action === 'act_add')
+                {
+                    myState.data[i].act_add = myState.data[i].act_add === 0 ? 1 : 0
+                }
+                else if (_action === 'act_edit')
+                {
+                    myState.data[i].act_edit = myState.data[i].act_edit === 0 ? 1 : 0
+                }
+                else if (_action === 'act_del')
+                {
+                    myState.data[i].act_del = myState.data[i].act_del === 0 ? 1 : 0
+                }
+                else if (_action === 'act_copy')
+                {
+                    myState.data[i].act_copy = myState.data[i].act_copy === 0 ? 1 : 0
+                }
+                else if (_action === 'act_print')
+                {
+                    myState.data[i].act_print = myState.data[i].act_print === 0 ? 1 : 0
+                }
+                else
+                {
+                    myState.data[i].act_other = myState.data[i].act_other === 0 ? 1 : 0
+                }
+                
+            }
+        }
+       
+        this.setState(myState);
+    }
+
+    onchangeCheckbox = (e, _action) => {
+        console.log(`checked = ${e.target.checked}`);
+        console.log("=>", _action)
+
+         //วิธี setState array of objects
+         var myState = Object.assign({}, this.state);
+
+         for (var i = 0; i < myState.data.length ; i++ )
+         {
+                 if (_action === 'act_open')
+                 {
+                     myState.data[i].act_open = e.target.checked === true ? 1 : 0
+                 }
+                 else if (_action === 'act_view')
+                 {
+                     myState.data[i].act_view = e.target.checked === true ? 1 : 0
+                 }
+                 else if (_action === 'act_add')
+                 {
+                     myState.data[i].act_add = e.target.checked === true ? 1 : 0
+                 }
+                 else if (_action === 'act_edit')
+                 {
+                     myState.data[i].act_edit = e.target.checked === true ? 1 : 0
+                 }
+                 else if (_action === 'act_del')
+                 {
+                     myState.data[i].act_del = e.target.checked === true ? 1 : 0
+                 }
+                 else if (_action === 'act_copy')
+                 {
+                     myState.data[i].act_copy = e.target.checked === true ? 1 : 0
+                 }
+                 else if (_action === 'act_print')
+                 {
+                     myState.data[i].act_print = e.target.checked === true ? 1 : 0
+                 }
+                 else
+                 {
+                     myState.data[i].act_other = e.target.checked === true ? 1 : 0
+                 }
+         }
+        
+         this.setState(myState);
     }
 
     myColumns() 
     {
         const columns = [
             {
-                title: 'รหัสแฟ้ม',
-                dataIndex: 'id',
-                width: 40,
+                title: '',
+                dataIndex: '',
+                width: '2%',
+                render : (record) => (
+                    <img src={record.level === 'A' ? adminPic : userPic } width='20' height='20'/>
+                )
             }, {
-                title: 'ชื่อแฟ้มระบบงาน',
+                title: 'level',
+                dataIndex: 'level',
+                width: '2%',
+            }, {
+                title: 'User Login',
+                dataIndex: 'user',
+                width: '8%',
+            }, {
+                title: 'ชื่อ - นามสกุล',
                 dataIndex: 'name',
+                // width: '15%',
             }, {
-                title: 'วันที่บันทึก',
-                dataIndex: 'pre_date',
-                width: 120,
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>เปิด</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_open')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',   //ถ้าจะใช้ record -> dataIndex ใส่เป็นค่าว่าง
+                width: '5px',
+                render : (record) => (
+                        <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_open')} > {this.state.data.map(v => {
+                         if (v.user === record.user)
+                         {
+                            return v.act_open === 0 ? <img src={lock} /> : <img src={unlock} />
+                         }
+                         })}
+                        </a></center>
+                     )
             }, {
-                title: 'ผู้บันทึก',
-                dataIndex: 'pre_by',
-                width: 140,
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>มุมมอง</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_view')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_view')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_view === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
             }, {
-                title: 'วันที่แก้ไข',
-                dataIndex: 'last_date',
-                width: 120,
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>เพิ่ม</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_add')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_add')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_add === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
             }, {
-                title: 'ผู้แก้ไข',
-                dataIndex: 'last_by',
-                width: 140,
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>แก้ไข</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_edit')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_edit')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_edit === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
+            }, {
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>ลบ</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_del')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_del')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_del === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
+            }, {
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>คัดลอก</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_copy')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_copy')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_copy === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
+            }, {
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>พิมพ์</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_print')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_print')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_print === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
+            }, {
+                title: () => (
+                    <div>
+                       <Label style={{ display:'flex', justifyContent:'center' }}>อื่นๆ</Label>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_other')}></Checkbox>
+                    </div>
+                ),
+                dataIndex: '',
+                width: '5px',
+                render : (record) => (
+                    <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_other')} > {this.state.data.map(v => {
+                     if (v.user === record.user)
+                     {
+                        return v.act_other === 0 ? <img src={lock} /> : <img src={unlock} />
+                     }
+                     })}
+                    </a></center>
+                 )
             }];
 
         return columns;
@@ -206,7 +429,7 @@ class AeFiles extends Component
                                 </Col>
                                 <Col md='6'>
                                 {this.props.match.path === '/main/filemst/add' ?
-                                    <Button color="success" onClick={this.handlerAddData}><BiPlusCircle /> เพิ่มข้อมูล</Button>
+                                    <Button color="success" onClick={this.handlerAddData}><BiSave /> บันทึกข้อมูล</Button>
                                     :
                                     <Button color="warning" onClick={this.handlerEditData}><BiEditAlt /> แก้ไขข้อมูล</Button>
                                  } 

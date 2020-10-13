@@ -549,7 +549,7 @@ class Recfirm extends Component
             formatter : this.GetActionFormat,
             events: {
               onClick: (e, column, columnIndex, row, rowIndex) => {
-                e.stopPropagation();
+                e.stopPropagation(); //ไม่ให้ expand row
               },
             },
             classes: "p-1"
