@@ -15,7 +15,6 @@ class Filemst extends Component
   async componentDidMount()
   {
         // const [name, pfs_id, pos] = Cookies.get("person").split("/")
-
         let result = await Axios.post("http://10.32.1.169:5001/api/files")
 
         if (result.data.length !== 0) 

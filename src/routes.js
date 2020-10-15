@@ -1,4 +1,4 @@
-import Dashboard from './views/Dashboard/Dashboard'
+// import Dashboard from './views/Dashboard/Dashboard'
 import Rec from './views/pages/recfirm' 
 import Report from './views/pages/report'
 import AeDoc from './views/pages/ae_recfirm'
@@ -7,7 +7,7 @@ import AeFile from './views/pages/ae_filemst'
 
 const routes = [
      {path: '/main', exact: true, name: 'หน้าหลัก', component: Rec},
-     {path: '/main/dashboard', exact: true ,name: 'Dashboard', component: Dashboard},
+     // {path: '/main/dashboard', exact: true ,name: 'Dashboard', component: Dashboard},
      {path: '/main/documents', exact: true ,name: 'ใบเปิด ORDER', component: Rec},
      {path: '/main/report/:id', exact: true ,name: 'รายงาน', component: Report},        //พิมพ์รายงาน
      {path: '/main/edit/:id', exact: true ,name: 'แก้ไขใบเปิด ORDER', component: AeDoc},   //แก้ไขใบเปิด ORDER

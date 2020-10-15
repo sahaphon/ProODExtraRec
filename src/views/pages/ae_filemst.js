@@ -1,6 +1,6 @@
 import React, { Component }  from 'react'
 import {Card, CardHeader, CardBody, Col, Row, Button, Form, Input, FormGroup, Label} from "reactstrap";
-import { BiSave, BiFolderOpen, BiEditAlt, BiTrash, BiPlusCircle } from 'react-icons/bi';
+import { BiSave, BiFolderOpen, BiEditAlt } from 'react-icons/bi';
 import { Table, Checkbox } from 'antd';
 import Axios from 'axios';
 import moment from 'moment';
@@ -11,6 +11,8 @@ import adminPic from '../../img/Admin-60.png';
 import userPic from '../../img/users-60.png';
 import lock from '../../img/lock_red.png';
 import unlock from '../../img/unlock_green.png';
+
+import customCss from '../../css/custom-tb.css';
 
 class AeFiles extends Component
 {
@@ -35,6 +37,7 @@ class AeFiles extends Component
                         level : v.act_user,
                         user : v.userid,
                         name : v.name,
+                        pos : v.position,
                         act_open : 0,
                         act_view : 0,
                         act_add : 0,
@@ -64,7 +67,7 @@ class AeFiles extends Component
         }
         else
         {
-            var fields = Cookies.get("authorization").split(":")
+            let fields = Cookies.get("authorization").split(":")
             let name = fields[0];
             
             let result = await Axios.post("http://10.32.1.169:5001/api/addfile", { docno : this.state.docno, name : this.state.name, user : name })
@@ -257,6 +260,9 @@ class AeFiles extends Component
                 dataIndex: 'name',
                 // width: '15%',
             }, {
+                title: 'ตำแหน่งงาน',
+                dataIndex: 'pos',
+            }, {
                 title: () => (
                     <div>
                        <Label style={{ display:'flex', justifyContent:'center' }}>เปิด</Label>
@@ -439,7 +445,8 @@ class AeFiles extends Component
                     </Form>
                     <Row style={{ marginTop: 10 }}>
                         <Col>
-                            <Table
+                            <Table className={customCss}
+                                bordered
                                 columns={ this.myColumns() }
                                 dataSource={ this.state.data }
                             />

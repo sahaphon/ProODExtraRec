@@ -1,12 +1,6 @@
 export default {
     items:[
         {
-            name: 'Dashboard',
-            url: '/main/dashboard',
-            icon: 'icon-speedometer',
-            attributes: { disabled: false }
-        },
-        {
           name: 'เอกสารเซ็นต์',
           icon: 'icon-tag',
           children: [

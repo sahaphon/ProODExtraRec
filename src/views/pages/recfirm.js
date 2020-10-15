@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import 'antd/dist/antd.css';
+// import 'antd/dist/antd.css';
 import { Steps, Badge, Tabs, Input, Form, Select, Table } from 'antd';
 import { CaretDownOutlined, CaretUpOutlined, CloseOutlined, CheckOutlined, DeleteOutlined, PrinterOutlined, BellOutlined } from '@ant-design/icons';
 import {
@@ -16,7 +16,9 @@ import moment from 'moment';
 import Cookies from "js-cookie";
 import Sweet from 'sweetalert2';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import { BiFolderOpen } from 'react-icons/bi';
+import { BiFolderOpen, BiCheckCircle } from 'react-icons/bi';
+
+// import tbstyle from '../../css/custom-tb.css';
 
 const { TabPane } = Tabs;
 
@@ -288,8 +290,8 @@ class Recfirm extends Component
 
   SignApprove = (e) => {
     
-     if (this.state.docno !== '')
-     {
+    //  if (this.state.docno !== '')
+    //  {
         Sweet.fire({
               title: 'Approval Confirmation?',
               text: "คุณต้องการอนุมัติเอกสาร ใช่หรือไม่",
@@ -301,7 +303,7 @@ class Recfirm extends Component
             }).then((result) => {
               if (result.isConfirmed) {
             
-                Axios.post("http://10.32.1.169:5001/api/signed", {position: this.state.sign_pos, pfs_id: this.state.pfs_id, docno: this.state.docno }).then(res => {
+                Axios.post("http://10.32.1.169:5001/api/signed", {position: this.state.sign_pos, pfs_id: this.state.pfs_id, docno: e }).then(res => {
 
                   console.log(res.data.succ)
                   if (res.data.succ === true)
@@ -312,7 +314,8 @@ class Recfirm extends Component
                         'success'
                       )
 
-                      this.GetDoc()  //Reload data 
+                      this.GetDoc()  //เอกสารรอเซ็นต์
+                      this.GetApprovedDoc() //เอกสารเซ็นต์แล้ว
                   }
                   else
                   {
@@ -327,15 +330,15 @@ class Recfirm extends Component
                 }) 
               }
             })
-     }
-     else
-     {
-       Sweet.fire({
-        icon: 'error',
-        title: 'ผิดพลาด',
-        text: 'โปรดคลิกเลือกรายการก่อน!'
-      })
-     }
+    //  }
+    //  else
+    //  {
+    //    Sweet.fire({
+    //     icon: 'error',
+    //     title: 'ผิดพลาด',
+    //     text: 'โปรดคลิกเลือกรายการก่อน!'
+    //   })
+    //  }
   }
 
   GetActionFormat = (cell, row) => {
@@ -412,14 +415,38 @@ class Recfirm extends Component
 
         //ตารางเอกสารเซ็นต์แล้ว
         const approved = [{
+          title: 'Docno',
+          dataIndex: 'docno',
+          render(text, record) {
+            return {
+              props: {
+                style: { textAlign : 'center'}
+              },
+              children: <div>{text}</div>
+            };
+          }
+        }, {
           title: 'Date',
           dataIndex: 'date',
+          render(text, record) {
+            return {
+              props: {
+                style: { textAlign : 'center'}
+              },
+              children: <div>{text}</div>
+            };
+          }
         }, {
           title: 'Time',
           dataIndex: 'time',
-        }, {
-          title: 'Docno',
-          dataIndex: 'docno',
+          render(text, record) {
+            return {
+              props: {
+                style: { textAlign : 'center'}
+              },
+              children: <div>{text}</div>
+            };
+          }
         }, {
           title: 'ประเภทเอกสาร',
           dataIndex: 'type',
@@ -429,10 +456,24 @@ class Recfirm extends Component
         }, {
           title: 'พนักงานขาย',
           dataIndex: 'sname',
+        }, {
+          title: '',
+          dataIndex: '',
+          render: (record) => (
+            <Button style={{ marginLeft: 5 }} color="info" onClick={()=> this.props.history.push("/main/report/" + record.docno) }><PrinterOutlined /> พิมพ์</Button>
+          )
         }];
        
         //ตารางเอกสารรอ Approve
         const waiting_approv = [{
+          title: 'Docno',
+          dataIndex: 'docno',
+          render: (docno, record) => (
+            <p style={{ fontSize: '13px', color:'green', fontWeight:'bold', paddingTop:'13px' }}>
+              {docno}
+            </p>
+          )
+        }, {
           title: 'Date',
           dataIndex: 'date',
           width: '12%',
@@ -444,14 +485,6 @@ class Recfirm extends Component
         }, {
           title: 'Time',
           dataIndex: 'time',
-        }, {
-          title: 'Docno',
-          dataIndex: 'docno',
-          render: (docno, record) => (
-            <p style={{ fontSize: '13px', color:'green', fontWeight:'bold', paddingTop:'13px' }}>
-              {docno}
-            </p>
-          )
         }, {
           title: 'ประเภทเอกสาร',
           dataIndex: 'type',
@@ -470,18 +503,44 @@ class Recfirm extends Component
           title: '',
           dataIndex: '',
           width: '10%',
-          render: () => <Button color="success" onClick={this.SignApprove}><CheckOutlined /> อนุมัติ</Button>
+          render: (record) => (
+              <Button color="success" onClick={() => this.SignApprove(record.docno)}><BiCheckCircle /> อนุมัติ</Button>
+          )   
         }, {
           title: '',
           dataIndex: '',
           width: '13%',
           render: () => <Button color="danger"><CloseOutlined /> ไม่อนุมัติ</Button>,
+        },{
+          titel: 'Action',
+          dataIndex: '',
+          render: (record) => (
+            <div>
+              <Button color="warning" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/edit/" + this.state.docno) : 
+              Sweet.fire({
+                icon: 'error',
+                title: 'ผิดพลาด',
+                text: 'โปรดเลือกรายการเพื่อเเก้ไข!',
+              })
+          }>แก้ไข</Button>
+            <Button style={{ marginLeft: 5 }} color="danger" onClick={ this.DelDocument }>ลบ</Button>
+            <Button style={{ marginLeft: 5 }} color="info" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/report/" + this.state.docno) : 
+                  Sweet.fire({
+                    icon: 'error',
+                    title: 'ผิดพลาด',
+                    text: 'โปรดเลือกรายการก่อนพิมพ์!',
+                  })
+              }><PrinterOutlined /> พิมพ์</Button>
+         </div>
+          // <Button style={{ marginLeft: 5 }} color="danger" onClick={ this.DelDocument }>ลบ</Button>
+    
+          )
         }, this.state.pfs_id === '42494' ? 
         {
           title: '',
           dataIndex: '',
           width: '15%',
-          render: () => 
+          render: (record) => 
             <Button color="primary"><BellOutlined /> ส่งต่อกรรมการ</Button>,
         }
         :
@@ -613,28 +672,28 @@ class Recfirm extends Component
           //   }
           // };
 
-          //คลิกแถวที่เลือก
-          const rowSelection = {
-            onChange: (selectedRowKeys, selectedRows) => {
-              console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            },
-            onSelect: (record, selected, selectedRows) => {
-              // console.log(record, selected, selectedRows);
-              console.log("คลิก : ", record.docno, "selected: ", selected);
-              if (selected && record.docno !== '') 
-              {
-                 this.setState({ docno: record.docno});
-              }
-              else{
-                console.log("ไม่ได้เลือก..")
-                this.setState({ id: '' });
-              }
-            },
-            onSelectAll: (selected, selectedRows, changeRows) => {
-              console.log("เลือกทั้งหมด")
-              // console.log(selected, selectedRows, changeRows);
-            },
-          };
+          // //คลิกแถวที่เลือก
+          // const rowSelection = {
+          //   onChange: (selectedRowKeys, selectedRows) => {
+          //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          //   },
+          //   onSelect: (record, selected, selectedRows) => {
+          //     // console.log(record, selected, selectedRows);
+          //     console.log("คลิก : ", record.docno, "selected: ", selected);
+          //     if (selected && record.docno !== '') 
+          //     {
+          //        this.setState({ docno: record.docno});
+          //     }
+          //     else{
+          //       console.log("ไม่ได้เลือก..")
+          //       this.setState({ id: '' });
+          //     }
+          //   },
+          //   onSelectAll: (selected, selectedRows, changeRows) => {
+          //     console.log("เลือกทั้งหมด")
+          //     // console.log(selected, selectedRows, changeRows);
+          //   },
+          // };
 
         return(
          
@@ -681,7 +740,6 @@ class Recfirm extends Component
                                                     columns={ columns }
                                                     expandRow={ expandRow }
                                                     rowStyle={ rowStyle }
-                                                    // rowEvents={ rowEvents }  เหตุการณ์คลิก Row
                                                     pagination={paginationFactory()}
                                                     hover
                                                 />
@@ -746,12 +804,13 @@ class Recfirm extends Component
                                       <Row style={{ marginTop: 10 }}>
                                         <Col>
                                             <Table
+                                                bordered
                                                 columns={ waiting_approv }
                                                 dataSource={ this.state.data_waiting }
-                                                rowSelection={{ 
-                                                  type: 'radio',
-                                                  ...rowSelection
-                                                 }}
+                                                // rowSelection={{ 
+                                                //   type: 'radio',
+                                                //   ...rowSelection
+                                                //  }}
                                             />
                                         </Col>
                                       </Row>
@@ -793,7 +852,7 @@ class Recfirm extends Component
                                               </Form.Item>
                                             </Input.Group>    
                                         </Col>
-                                        <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                                        {/* <Col style={{ display: "flex", justifyContent: "flex-end" }}>
                                             <Button style={{ marginLeft: 5 }} color="danger"><DeleteOutlined style={{ marginBottom: 3 }} /> ลบรายการ</Button>
                                             <Button style={{ marginLeft: 5 }} color="info" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/report/" + this.state.docno) : 
                                               Sweet.fire({
@@ -802,17 +861,18 @@ class Recfirm extends Component
                                                 text: 'โปรดเลือกรายการ ก่อนพิมพ์!',
                                               })
                                           }><PrinterOutlined /> พิมพ์</Button>
-                                        </Col>
+                                        </Col> */}
                                       </Row>
                                       <Row style={{ marginTop: 10 }}>
                                         <Col>
-                                            <Table
+                                            <Table //className={tbstyle}
+                                                bordered
                                                 columns={ approved }
                                                 dataSource={ this.state.data_signed }
-                                                rowSelection= {{ 
-                                                  type: 'radio',
-                                                  ...rowSelection
-                                                 }} 
+                                                // rowSelection= {{ 
+                                                //   type: 'radio',
+                                                //   ...rowSelection
+                                                //  }} 
                                             />
                                         </Col>
                                       </Row>
