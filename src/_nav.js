@@ -20,11 +20,6 @@ export default {
               url: '/main/filemst',
               icon: 'icon-folder-alt',
             },
-            {
-              name: 'แฟ้มข้อมูลผู้ใช้งาน',
-              url: '',
-              icon: 'icon-user',
-            },
           ]
         },    
     ]

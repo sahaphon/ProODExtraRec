@@ -14,7 +14,6 @@ class Filemst extends Component
 
   async componentDidMount()
   {
-        // const [name, pfs_id, pos] = Cookies.get("person").split("/")
         let result = await Axios.post("http://10.32.1.169:5001/api/files")
 
         if (result.data.length !== 0) 
@@ -103,30 +102,7 @@ class Filemst extends Component
     }
 
      render () {
-
-        //คลิกแถวที่เลือก
-        //   const rowSelection = {
-        //     onChange: (selectedRowKeys, selectedRows) => {
-        //       console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-        //     },
-        //     onSelect: (record, selected, selectedRows) => {
-        //       // console.log(record, selected, selectedRows);
-        //       console.log("คลิก : ", record.id, "selected: ", selected);
-        //       if (selected && record.docno !== '') 
-        //       {
-        //          this.setState({ docno: record.id});
-        //       }
-        //       else{
-        //         console.log("ไม่ได้เลือก..")
-        //         this.setState({ docno: '' });
-        //       }
-        //     },
-        //     onSelectAll: (selected, selectedRows, changeRows) => {
-        //       console.log("เลือกทั้งหมด")
-        //       // console.log(selected, selectedRows, changeRows);
-        //     },
-        //   };
-
+         
         return (
            <div>
               <Card>
@@ -142,10 +118,6 @@ class Filemst extends Component
                             <Table
                                 columns={ this.myColumns() }
                                 dataSource={ this.state.data }
-                                // rowSelection= {{ 
-                                //     type: 'radio',
-                                //     ...rowSelection
-                                //     }} 
                             />
                         </Col>
                     </Row>

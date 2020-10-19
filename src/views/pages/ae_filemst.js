@@ -24,6 +24,7 @@ class AeFiles extends Component
  
     async componentDidMount()
     {
+        console.log("ทำ DidMount")
         if (this.props.match.path === '/main/filemst/add')
         {
             let result = await Axios.post("http://10.32.1.169:5001/api/getusr")
@@ -50,8 +51,49 @@ class AeFiles extends Component
                 })
             }
 
-            console.log(myDt)
+            // console.log(myDt)
             this.setState({ data : myDt })
+        }
+        else  //กรณีแก้ไข 
+        {
+            console.log("ทำ Edit : ", this.props.match.params.id )
+ 
+            let strId = this.props.match.params.id;
+            let str = strId.split('~');
+            let strNo = str[0];
+            let strName = str[1];
+
+            let result = await Axios.post("http://10.32.1.169:5001/api/loadfilemst", { docno : strNo})
+            
+            let myData = [];
+            if (result.data.length !== 0) 
+            {
+                result.data.data && result.data.data.map(v => {
+                   
+                    myData.push({
+                        level : v.act_user,
+                        user : v.user_id,
+                        name : v.name,
+                        pos : v.position,
+                        act_open : v.act_open === false ? 0 : 1,
+                        act_view : v.act_view === false ? 0 : 1,
+                        act_add : v.act_add === false ? 0 : 1,
+                        act_edit : v.act_edit === false ? 0 : 1,
+                        act_del : v.act_delete === false ? 0 : 1,
+                        act_copy : v.act_copy === false ? 0 : 1,
+                        act_print : v.act_print === false ? 0 : 1,
+                        act_other : v.act_other === false ? 0 : 1,
+                    })
+                })
+
+                // this.setState({ data : myData })
+            }
+            else{
+                console.log("No data..")
+            }
+
+            console.log(myData);
+            this.setState({ docno: strNo, name: strName, data: myData });
         }
     }
 
@@ -70,9 +112,9 @@ class AeFiles extends Component
             let fields = Cookies.get("authorization").split(":")
             let name = fields[0];
             
-            let result = await Axios.post("http://10.32.1.169:5001/api/addfile", { docno : this.state.docno, name : this.state.name, user : name })
+            let result = await Axios.post("http://10.32.1.169:5001/api/addfile", { docno : this.state.docno, name : this.state.name, user : name, data: this.state.data })
 
-            let myDt = [];
+            // let myDt = [];
             if (result.data.length !== 0) 
             {
                 if (result.data.exist === true)
@@ -85,19 +127,7 @@ class AeFiles extends Component
                 }
                 else
                 {
-                    result.data.data && result.data.data.map(v => {
-                   
-                        myDt.push({
-                            id : v.file_icon,
-                            name : v.file_name,
-                            pre_date : moment(v.pre_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pre_date).format("DD-MM-YYYY"),
-                            pre_by : v.pre_by,
-                            last_date : v.last_date === null ? '' : moment(v.last_date).format("DD-MM-YYYY"),
-                            last_by : v.last_by,
-                        })
-                    })
-    
-                    this.setState({ data : myDt, docno: '', name : '' })
+                    this.props.history.push("/main/filemst"); 
                 }
 
             }
@@ -119,27 +149,9 @@ class AeFiles extends Component
             var fields = Cookies.get("authorization").split(":")
             let name = fields[0];
             
-            let result = await Axios.post("http://10.32.1.169:5001/api/updatefile", { docno : this.state.docno, name : this.state.name, user : name })
+            let result = await Axios.post("http://10.32.1.169:5001/api/updatefile", { docno : this.state.docno, name : this.state.name, user : name, data: this.state.data })
 
-            let myDt = [];
-            if (result.data.length !== 0) 
-            {
-
-                result.data.data && result.data.data.map(v => {
-                
-                    myDt.push({
-                        id : v.file_icon,
-                        name : v.file_name,
-                        pre_date : moment(v.pre_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pre_date).format("DD-MM-YYYY"),
-                        pre_by : v.pre_by,
-                        last_date : v.last_date === null ? '' : moment(v.last_date).format("DD-MM-YYYY"),
-                        last_by : v.last_by,
-                    })
-                })
-
-               
-                this.setState({ data : myDt, docno: '', name : '' })
-            }
+            this.props.history.push("/main/filemst"); 
         }
     }
 
@@ -200,38 +212,38 @@ class AeFiles extends Component
 
          for (var i = 0; i < myState.data.length ; i++ )
          {
-                 if (_action === 'act_open')
-                 {
-                     myState.data[i].act_open = e.target.checked === true ? 1 : 0
-                 }
-                 else if (_action === 'act_view')
-                 {
-                     myState.data[i].act_view = e.target.checked === true ? 1 : 0
-                 }
-                 else if (_action === 'act_add')
-                 {
-                     myState.data[i].act_add = e.target.checked === true ? 1 : 0
-                 }
-                 else if (_action === 'act_edit')
-                 {
-                     myState.data[i].act_edit = e.target.checked === true ? 1 : 0
-                 }
-                 else if (_action === 'act_del')
-                 {
-                     myState.data[i].act_del = e.target.checked === true ? 1 : 0
-                 }
-                 else if (_action === 'act_copy')
-                 {
-                     myState.data[i].act_copy = e.target.checked === true ? 1 : 0
-                 }
-                 else if (_action === 'act_print')
-                 {
-                     myState.data[i].act_print = e.target.checked === true ? 1 : 0
-                 }
-                 else
-                 {
-                     myState.data[i].act_other = e.target.checked === true ? 1 : 0
-                 }
+                if (_action === 'act_open')
+                {
+                    myState.data[i].act_open = e.target.checked === true ? 1 : 0
+                }
+                else if (_action === 'act_view')
+                {
+                    myState.data[i].act_view = e.target.checked === true ? 1 : 0
+                }
+                else if (_action === 'act_add')
+                {
+                    myState.data[i].act_add = e.target.checked === true ? 1 : 0
+                }
+                else if (_action === 'act_edit')
+                {
+                    myState.data[i].act_edit = e.target.checked === true ? 1 : 0
+                }
+                else if (_action === 'act_del')
+                {
+                    myState.data[i].act_del = e.target.checked === true ? 1 : 0
+                }
+                else if (_action === 'act_copy')
+                {
+                    myState.data[i].act_copy = e.target.checked === true ? 1 : 0
+                }
+                else if (_action === 'act_print')
+                {
+                    myState.data[i].act_print = e.target.checked === true ? 1 : 0
+                }
+                else
+                {
+                    myState.data[i].act_other = e.target.checked === true ? 1 : 0
+                }
          }
         
          this.setState(myState);
@@ -258,7 +270,6 @@ class AeFiles extends Component
             }, {
                 title: 'ชื่อ - นามสกุล',
                 dataIndex: 'name',
-                // width: '15%',
             }, {
                 title: 'ตำแหน่งงาน',
                 dataIndex: 'pos',
@@ -266,14 +277,15 @@ class AeFiles extends Component
                 title: () => (
                     <div>
                        <Label style={{ display:'flex', justifyContent:'center' }}>เปิด</Label>
-                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_open')}></Checkbox>
+                       <Checkbox style={{ display:'flex', justifyContent:'center' }} onChange={(e)=> this.onchangeCheckbox(e, 'act_open')} ></Checkbox>
                     </div>
                 ),
                 dataIndex: '',   //ถ้าจะใช้ record -> dataIndex ใส่เป็นค่าว่าง
                 width: '5px',
                 render : (record) => (
                         <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_open')} > {this.state.data.map(v => {
-                         if (v.user === record.user)
+                          
+                         if (v.user === record.user )
                          {
                             return v.act_open === 0 ? <img src={lock} /> : <img src={unlock} />
                          }
@@ -327,6 +339,7 @@ class AeFiles extends Component
                 width: '5px',
                 render : (record) => (
                     <center><a onDoubleClick={() => this.handleClickCell(record.user, 'act_edit')} > {this.state.data.map(v => {
+
                      if (v.user === record.user)
                      {
                         return v.act_edit === 0 ? <img src={lock} /> : <img src={unlock} />
@@ -434,7 +447,7 @@ class AeFiles extends Component
                                     <Input style={{ color:'brown' }} type="name" name="name" id="name" data-index='1' value={this.state.name} onChange={(e) => this.setState({ name : e.target.value})} />
                                 </Col>
                                 <Col md='6'>
-                                {this.props.match.path === '/main/filemst/add' ?
+                                    {this.props.match.path === '/main/filemst/add' ?
                                     <Button color="success" onClick={this.handlerAddData}><BiSave /> บันทึกข้อมูล</Button>
                                     :
                                     <Button color="warning" onClick={this.handlerEditData}><BiEditAlt /> แก้ไขข้อมูล</Button>

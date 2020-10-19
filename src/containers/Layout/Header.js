@@ -58,7 +58,7 @@ class Header extends React.Component {
                         <DropdownMenu right>
                             <DropdownItem header tag="div" className="text-center"><strong>ตั้งค่า</strong></DropdownItem>
                             <DropdownItem><i className="fa fa-user"></i> ข้อมูลผู้ใช้งาน</DropdownItem>
-                            <DropdownItem><i className="fa fa-file"></i> ข้อมูลระบบงาน</DropdownItem>
+                            {/* <DropdownItem><i className="fa fa-file"></i> ข้อมูลระบบงาน</DropdownItem> */}
                             <DropdownItem><i className="fa fa-key"></i> เปลี่ยนรหัสผ่าน</DropdownItem>                          
                             <DropdownItem onClick={() => {
                                   Swal.fire({

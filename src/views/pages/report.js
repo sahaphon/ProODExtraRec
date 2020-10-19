@@ -54,15 +54,14 @@ class PreparingData extends React.Component {
                     disc: v.disc,
                     disc_net: v.disc_net,
                     cr_term: v.cr_term,
-                    depost: v.depost,
+                    depost: v.deposit,
                     remark: v.remark,
-                    sign2: v.sign2,
-                    sign3: v.sign3,
-                    sign4: v.sign4,
-                    sign5: v.sign5,
-                    sign6: v.sign6,
-                    sign7: v.sign7,
-                    sign8: v.sign8,
+                    sign2: v.pos2,
+                    sign3: v.pos3,
+                    sign4: v.pos4,
+                    sign5: v.pos5,
+                    sign6: v.pos6,
+                    sign7: v.pos7,
                     kasorb_to: v.kasorb_to,
                     kasorb_no: v.kasorb_no,
                     kasorb_style: v.kasorb_style,
@@ -73,6 +72,7 @@ class PreparingData extends React.Component {
                })
             })
 
+            console.log(dt)
             this.setState({ data: dt });
 
             var totQty = 0;
@@ -339,22 +339,29 @@ class PreparingData extends React.Component {
                   </Col>
                   <Col xs='2'>
                       {this.state.data.map((v) => {
-                          return  v.sign2 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign2 + '.jpg'} alt="" />
+                          return  v.sign3 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign3 + '.jpg'} alt="" />
                       })}
                   </Col>
                   <Col xs='2'> 
                       {this.state.data.map((v) => {
-                          return  v.sign3 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign3 + '.jpg'} alt="" />
+                          return  v.sign5 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign5 + '.jpg'} alt="" />
                       })}
                   </Col>
                   <Col xs='2'>
                      {this.state.data.map((v) => {
-                          return  v.sign4 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign4 + '.jpg'} alt="" />
+                          return  v.sign6 !== '39C62' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign6 + '.jpg'} alt="" />
                       })}
                   </Col>
                   <Col xs='2'>
                     {this.state.data.map((v) => {
-                          return  v.sign5 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign5 + '.jpg'} alt="" />
+                       if (v.sign6 === '')
+                       {
+                           return '';
+                       }
+                       else if (v.sign6 === '39C62')
+                       {
+                           return v.sign7 === '' ? '' : <img src={"http://192.168.2.14/SignPic/" + v.sign7 + '.jpg'} alt="" /> 
+                       }
                       })}
                   </Col>
                   <Col xs='1'>

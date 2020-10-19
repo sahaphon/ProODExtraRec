@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // import 'antd/dist/antd.css';
-import { Steps, Badge, Tabs, Input, Form, Select, Table } from 'antd';
-import { CaretDownOutlined, CaretUpOutlined, CloseOutlined, CheckOutlined, DeleteOutlined, PrinterOutlined, BellOutlined } from '@ant-design/icons';
+import { Steps, Badge, Tabs, Input, Form, Select, Table, Dropdown, Menu } from 'antd';
+import { CaretDownOutlined, CaretUpOutlined, CloseOutlined, PrinterOutlined, BellOutlined } from '@ant-design/icons';
 import {
   Card,
   CardHeader,
@@ -16,9 +16,7 @@ import moment from 'moment';
 import Cookies from "js-cookie";
 import Sweet from 'sweetalert2';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import { BiFolderOpen, BiCheckCircle } from 'react-icons/bi';
-
-// import tbstyle from '../../css/custom-tb.css';
+import { BiFolderOpen, BiCheckCircle, BiChevronDownSquare, BiEditAlt, BiPrinter, BiEraser,BiPaperPlane, BiDislike, BiDotsHorizontal } from 'react-icons/bi';
 
 const { TabPane } = Tabs;
 
@@ -40,168 +38,170 @@ class Recfirm extends Component
     //sign_pos คือ ตำแหน่งที่ user คนนั้นต้องเซ็นต์ 
     async componentDidMount()
     {
-        const [name, pfs_id, pos] = Cookies.get("person").split("/")
-        let result = await Axios.post("http://10.32.1.169:5001/api/getrec_doc", { pfs_id: pfs_id })
-
-        if (result.data.length !== 0) 
-        {
-          const data = [];
-          let i = 0;
-
-          this.setState({ sign_pos: result.data.position, pfs_id: pfs_id }); //บันทึกตำแหน่งที่ต้องเซ็นต์
-
-          let nSign = 0;
-          result.data.data && result.data.data.map((v) => {
-
-              if (i === 0)
-              {
-                this.setState({ haveDt: '1' })
-              }
-
-              for (var j=1; j <= 7 ; j++)
-              {
-
-                  if (j === 1 && v.pos1 === 'Finished')
-                  {
-                    nSign = 1
-                  }
-                  else if (j === 2)
-                  {
-                    if (v.pos2 === 'Finished')
-                    {
-                      nSign = 2
-                    }
-                  }
-                  else if (j === 3)
-                  {
-                     if (v.pos3 === 'Finished')
-                     {
-                       nSign = 3
-                     }
-                  }
-                  else if (j === 4)
-                  {
-                     if (v.pos4 === 'Finished')
-                     {
-                       nSign = 4
-                     }
-                  }
-                  else if (j === 5)
-                  {
-                     if (v.pos5 === 'Finished')
-                     {
-                       nSign = 5
-                     }
-                  }
-                  else if (j === 6)
-                  {
-                     if (v.pos6 === 'Finished')
-                     {
-                       nSign = 6
-                     }
-                  }
-                  else if (j === 7)
-                  {
-                     if (v.pos7 === 'Finished')
-                     {
-                       nSign = 7
-                     }
-                  }
-              }
-
-                data.push({
-                  date: moment(v.date).format("DD-MM-YYYY"),
-                  no: v.row_num,
-                  docno: v.docno,
-                  desc: 'เอกสารใบเปิด ORDER',
-                  sign1: v.pos1_signed,
-                  sign1_date: moment(v.pos1_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos1_date).format("DD-MM-YYYY"),
-                  sign2: v.pos2_signed,
-                  sign2_date: moment(v.pos2_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos2_date).format("DD-MM-YYYY"),
-                  sign3: v.pos3_signed,
-                  sign3_date: moment(v.pos3_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos3_date).format("DD-MM-YYYY"),
-                  sign4: v.pos4_signed,
-                  sign4_date: moment(v.pos4_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos4_date).format("DD-MM-YYYY"),
-                  sign5: v.pos5_signed,
-                  sign5_date: moment(v.pos5_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos5_date).format("DD-MM-YYYY"),
-                  sign6: v.pos6_signed,
-                  sign6_date: moment(v.pos6_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos6_date).format("DD-MM-YYYY"),
-                  code: v.code,
-                  name: v.custname,
-                  sale: v.saleman,
-                  prod: v.prodcode,
-                  doctype: v.doctype,
-                  time: moment.utc(v.date).format("HH:mm:ss"),
-                  remark: v.remark,
-                  progress: nSign + '/' + (v.p7 === '' ? 6 : 7),
-                  pos2: v.pos2,
-                  pos3: v.pos3,
-                  pos4: v.pos4,
-                  pos5: v.pos5,
-                  pos6: v.pos6,
-                  pos7: v.pos7,
-                  totapprv: v.p7 === '' ? 6 : 7,
-                  current_pos: nSign,
-                })
-        
-                //<Progress width={25} type="circle" percent={v.progress} />
-             i = i + 1
-          })
-
-          //เอกสารรอเซ็นตาม userlogin
-          const data_p = [];
-          var j = 0;
-
-          result.data.data_person && result.data.data_person.map((v, index) => {
-
-                j =j + 1
-
-                data_p.push({
-                   key: index,
-                   date: moment(v.date).format("DD-MM-YYYY"),
-                   time: moment.utc(v.date).format("HH:mm:ss"),
-                   docno: v.docno,
-                   type: v.doctype,
-                   cname: v.custname,
-                   sname: v.sname, 
-                })
-          })
-
-          //เอกสารเซ็นต์แล้ว
-          const data_ap = [];
-          var k = 0;
-
-          result.data.data_approved && result.data.data_approved.map((v, index) => {
-            
-             k = k + 1
-
-             data_ap.push({
-                key: index,
-                date: moment(v.date).format("DD-MM-YYYY"),
-                time: moment.utc(v.date).format("HH:mm:ss"),
-                docno: v.docno,
-                type: v.title,
-                cname: v.custname,
-                sname: v.saleman + ' ' + v.sname, 
-             })
-          })
-
-          this.setState({ recfirm: data, count_all: i, data_waiting: data_p, count_wait: j, data_signed: data_ap, count_singed: k });
-        }
-        else
-        {
-          console.log("Not found data..")
-        }
+       this.ReloadAllData()
     }
+
+  async ReloadAllData()
+  {
+    const [name, pfs_id, pos] = Cookies.get("person").split("/")
+    let result = await Axios.post("http://10.32.1.169:5001/api/getrec_doc", { pfs_id: pfs_id })
+
+    if (result.data.length !== 0) 
+    {
+      const data = [];
+      let i = 0;
+
+      this.setState({ sign_pos: result.data.position, pfs_id: pfs_id }); //บันทึกตำแหน่งที่ต้องเซ็นต์
+
+      let nSign = 0;
+      result.data.data && result.data.data.map((v) => {
+
+          if (i === 0)
+          {
+            this.setState({ haveDt: '1' })
+          }
+
+          for (var j=1; j <= 7 ; j++)
+          {
+
+              if (j === 1 && v.pos1 === 'Finished')
+              {
+                nSign = 1
+              }
+              else if (j === 2)
+              {
+                if (v.pos2 === 'Finished')
+                {
+                  nSign = 2
+                }
+              }
+              else if (j === 3)
+              {
+                 if (v.pos3 === 'Finished')
+                 {
+                   nSign = 3
+                 }
+              }
+              else if (j === 4)
+              {
+                 if (v.pos4 === 'Finished')
+                 {
+                   nSign = 4
+                 }
+              }
+              else if (j === 5)
+              {
+                 if (v.pos5 === 'Finished')
+                 {
+                   nSign = 5
+                 }
+              }
+              else if (j === 6)
+              {
+                 if (v.pos6 === 'Finished')
+                 {
+                   nSign = 6
+                 }
+              }
+              else if (j === 7)
+              {
+                 if (v.pos7 === 'Finished')
+                 {
+                   nSign = 7
+                 }
+              }
+          }
+
+            data.push({
+              date: moment(v.date).format("DD-MM-YYYY"),
+              no: v.row_num,
+              docno: v.docno,
+              desc: 'เอกสารใบเปิด ORDER',
+              sign1: v.pos1_signed,
+              sign1_date: moment(v.pos1_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos1_date).format("DD-MM-YYYY"),
+              sign2: v.pos2_signed,
+              sign2_date: moment(v.pos2_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos2_date).format("DD-MM-YYYY"),
+              sign3: v.pos3_signed,
+              sign3_date: moment(v.pos3_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos3_date).format("DD-MM-YYYY"),
+              sign4: v.pos4_signed,
+              sign4_date: moment(v.pos4_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos4_date).format("DD-MM-YYYY"),
+              sign5: v.pos5_signed,
+              sign5_date: moment(v.pos5_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos5_date).format("DD-MM-YYYY"),
+              sign6: v.pos6_signed,
+              sign6_date: moment(v.pos6_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos6_date).format("DD-MM-YYYY"),
+              code: v.code,
+              name: v.custname,
+              sale: v.saleman,
+              prod: v.prodcode,
+              doctype: v.doctype,
+              time: moment.utc(v.date).format("HH:mm:ss"),
+              remark: v.remark,
+              progress: nSign + '/' + (v.p7 === '' ? 6 : 7),
+              pos2: v.pos2,
+              pos3: v.pos3,
+              pos4: v.pos4,
+              pos5: v.pos5,
+              pos6: v.pos6,
+              pos7: v.pos7,
+              totapprv: v.p7 === '' ? 6 : 7,
+              showbtn: v.p7 === '' ? 1 : 0,
+              current_pos: nSign,
+            })
+    
+            //<Progress width={25} type="circle" percent={v.progress} />
+         i = i + 1
+      })
+
+      //เอกสารรอเซ็นตาม userlogin
+      const data_p = [];
+      var j = 0;
+
+      result.data.data_person && result.data.data_person.map((v, index) => {
+
+            j =j + 1
+
+            data_p.push({
+               key: index,
+               date: moment(v.date).format("DD-MM-YYYY"),
+               time: moment.utc(v.date).format("HH:mm:ss"),
+               docno: v.docno,
+               type: v.doctype,
+               cname: v.custname,
+               sname: v.sname, 
+            })
+      })
+
+      //เอกสารเซ็นต์แล้ว
+      const data_ap = [];
+      var k = 0;
+
+      result.data.data_approved && result.data.data_approved.map((v, index) => {
+        
+         k = k + 1
+
+         data_ap.push({
+            key: index,
+            date: moment(v.date).format("DD-MM-YYYY"),
+            time: moment.utc(v.date).format("HH:mm:ss"),
+            docno: v.docno,
+            type: v.title,
+            cname: v.custname,
+            sname: v.saleman + ' ' + v.sname, 
+         })
+      })
+
+      this.setState({ recfirm: data, count_all: i, data_waiting: data_p, count_wait: j, data_signed: data_ap, count_singed: k });
+    }
+  }
 
   callback = key => 
   {
     // console.log(" คลิก Tab ==> ", key)
-    if (key === '2')
+    if (key === '2')  //เอกสารรอเซ็นรายคน
     {
         this.GetDoc()
     }
-    else if (key === '3')
+    else if (key === '3') //เอกสารเซ็นแล้ว
     {
         this.GetApprovedDoc()
     }
@@ -235,11 +235,8 @@ class Recfirm extends Component
      }
   }
 
- DelDocument = async () =>
+ DelDocument = async (val) =>
   {
-
-     if (this.state.docno !== '')
-     {
         Sweet.fire({
           title: 'Approval Confirmation?',
           text: "คุณต้องการลบเอกสาร ใช่หรือไม่",
@@ -251,9 +248,8 @@ class Recfirm extends Component
         }).then((result) => {
           if (result.isConfirmed) {
         
-            Axios.post("http://10.32.1.169:5001/api/delete", { docno: this.state.docno }).then(res => {
+            Axios.post("http://10.32.1.169:5001/api/delete", { docno: val }).then(res => {
 
-              console.log(res.data.succ)
               if (res.data.success === true)
               {
                   Sweet.fire(
@@ -266,32 +262,110 @@ class Recfirm extends Component
               }
               else
               {
-                console.log("Not Ok.", res.data.error)
                 Sweet.fire(
                   'Error!',
                   'เกิดข้อผิดพลาด : ' + res.data.error + ' กรุณาลองใหม่อึกครั้ง!',
                   'error'
                 )
               }
-
             }) 
           }
         })
-     } 
-     else
+  }
+
+  DropDownItem(value)
+  {
+
+    const menu = (
+      <Menu onClick={(e) => this.handleMenuClick(e, value)}>
+        <Menu.Item key="1" icon={<BiEditAlt />}>
+          แก้ไข
+        </Menu.Item>
+        <Menu.Item key="2" icon={<BiEraser />}>
+           ลบ
+        </Menu.Item>
+        <Menu.Item key="3" icon={<BiPrinter />}>
+           พิมพ์
+        </Menu.Item>
+      </Menu>
+    );
+
+    return menu;
+  }
+
+  handleMenuClick = async (e, val) => {
+    //  console.log("ปุ่ม :", e.key);
+    //  console.log("เอกสาร :", val);
+
+    const str = Cookies.get("authorization").split(":")
+    let user = str[0];
+
+     if (e.key === '1')  //แก้ไข
      {
-        Sweet.fire({
-          icon: 'error',
-          title: 'ผิดพลาด',
-          text: 'โปรดเลือกรายการด้วย!',
-        })
+        //เช็คสิทธิ์การแก้ไขข้อมูล
+        let result = await Axios.post("http://10.32.1.169:5001/api/permission", {docno: 'F1', user: user, act : 'EDIT' })
+        
+        if (result.data.length !== 0)
+        {
+              if (result.data.data ===  true)
+              {
+                this.props.history.push("/main/edit/" + val)
+              }
+              else
+              {
+                  Sweet.fire(
+                    'Access denied!',
+                    'ขออภัยคุณไม่มีสิทธิ์ดำเนินการในส่วนนี้..',
+                    'error'
+                  )
+              }
+        }
+     }
+     else if (e.key === '2') //ลบ
+     {
+        let result = await Axios.post("http://10.32.1.169:5001/api/permission", {docno: 'F1', user: user, act : 'DEL' })
+          
+        if (result.data.length !== 0)
+        {
+              if (result.data.data ===  true)
+              {
+                 this.DelDocument(val) 
+              }
+              else
+              {
+                  Sweet.fire(
+                    'Access denied!',
+                    'ขออภัยคุณไม่มีสิทธิ์ดำเนินการในส่วนนี้..',
+                    'error'
+                  )
+              }
+        }         
+     }
+     else  //พิมพ์
+     {
+        let result = await Axios.post("http://10.32.1.169:5001/api/permission", {docno: 'F1', user: user, act : 'PRINT' })
+            
+        if (result.data.length !== 0)
+        {
+              if (result.data.data ===  true)
+              {
+                 this.props.history.push("/main/report/" + val)
+              }
+              else
+              {
+                  Sweet.fire(
+                    'Access denied!',
+                    'ขออภัยคุณไม่มีสิทธิ์ดำเนินการในส่วนนี้..',
+                    'error'
+                  )
+              }
+        }         
+
      }
   }
 
+
   SignApprove = (e) => {
-    
-    //  if (this.state.docno !== '')
-    //  {
         Sweet.fire({
               title: 'Approval Confirmation?',
               text: "คุณต้องการอนุมัติเอกสาร ใช่หรือไม่",
@@ -305,7 +379,6 @@ class Recfirm extends Component
             
                 Axios.post("http://10.32.1.169:5001/api/signed", {position: this.state.sign_pos, pfs_id: this.state.pfs_id, docno: e }).then(res => {
 
-                  console.log(res.data.succ)
                   if (res.data.succ === true)
                   {
                       Sweet.fire(
@@ -319,7 +392,7 @@ class Recfirm extends Component
                   }
                   else
                   {
-                    console.log("Not Ok.", res.data.msg)
+                    // console.log("Not Ok.", res.data.msg)
                     Sweet.fire(
                       'Error!',
                       'เกิดข้อผิดพลาด : ' + res.data.msg + ' กรุณาลองใหม่อึกครั้ง!',
@@ -330,15 +403,6 @@ class Recfirm extends Component
                 }) 
               }
             })
-    //  }
-    //  else
-    //  {
-    //    Sweet.fire({
-    //     icon: 'error',
-    //     title: 'ผิดพลาด',
-    //     text: 'โปรดคลิกเลือกรายการก่อน!'
-    //   })
-    //  }
   }
 
   GetActionFormat = (cell, row) => {
@@ -397,13 +461,134 @@ class Recfirm extends Component
               })
           })
 
-          this.setState({ data_waiting: data, count_wait: i })
+
+          //โหลดข้อมูลเอกสารทั้งหมด
+          const data2 = [];
+          let k = 0;
+
+          let nSign = 0;
+          result.data.data_main && result.data.data_main.map((v) => {
+                 
+              if (k === 0)
+              {
+                this.setState({ haveDt: '1' })
+              }
+
+              for (var j=1; j <= 7 ; j++)
+              {
+
+                  if (j === 1 && v.pos1 === 'Finished')
+                  {
+                    nSign = 1
+                  }
+                  else if (j === 2)
+                  {
+                    if (v.pos2 === 'Finished')
+                    {
+                      nSign = 2
+                    }
+                  }
+                  else if (j === 3)
+                  {
+                     if (v.pos3 === 'Finished')
+                     {
+                       nSign = 3
+                     }
+                  }
+                  else if (j === 4)
+                  {
+                     if (v.pos4 === 'Finished')
+                     {
+                       nSign = 4
+                     }
+                  }
+                  else if (j === 5)
+                  {
+                     if (v.pos5 === 'Finished')
+                     {
+                       nSign = 5
+                     }
+                  }
+                  else if (j === 6)
+                  {
+                     if (v.pos6 === 'Finished')
+                     {
+                       nSign = 6
+                     }
+                  }
+                  else if (j === 7)
+                  {
+                     if (v.pos7 === 'Finished')
+                     {
+                       nSign = 7
+                     }
+                  }
+              }
+
+                data2.push({
+                  date: moment(v.date).format("DD-MM-YYYY"),
+                  no: v.row_num,
+                  docno: v.docno,
+                  desc: 'เอกสารใบเปิด ORDER',
+                  sign1: v.pos1_signed,
+                  sign1_date: moment(v.pos1_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos1_date).format("DD-MM-YYYY"),
+                  sign2: v.pos2_signed,
+                  sign2_date: moment(v.pos2_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos2_date).format("DD-MM-YYYY"),
+                  sign3: v.pos3_signed,
+                  sign3_date: moment(v.pos3_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos3_date).format("DD-MM-YYYY"),
+                  sign4: v.pos4_signed,
+                  sign4_date: moment(v.pos4_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos4_date).format("DD-MM-YYYY"),
+                  sign5: v.pos5_signed,
+                  sign5_date: moment(v.pos5_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos5_date).format("DD-MM-YYYY"),
+                  sign6: v.pos6_signed,
+                  sign6_date: moment(v.pos6_date).format("DD-MM-YYYY") === '01-01-1900' ? '' : moment(v.pos6_date).format("DD-MM-YYYY"),
+                  code: v.code,
+                  name: v.custname,
+                  sale: v.saleman,
+                  prod: v.prodcode,
+                  doctype: v.doctype,
+                  time: moment.utc(v.date).format("HH:mm:ss"),
+                  remark: v.remark,
+                  progress: nSign + '/' + (v.p7 === '' ? 6 : 7),
+                  pos2: v.pos2,
+                  pos3: v.pos3,
+                  pos4: v.pos4,
+                  pos5: v.pos5,
+                  pos6: v.pos6,
+                  pos7: v.pos7,
+                  totapprv: v.p7 === '' ? 6 : 7,
+                  showbtn: v.p7 === '' ? 1 : 0,
+                  current_pos: nSign,
+                })
+  
+             k = k + 1;
+          })
+
+          this.setState({ data_waiting: data, count_wait: i, recfirm: data2, count_all: k })
        }
+  }
+
+  referMgrDirect = async (e) => {
+    
+    let result = await Axios.post("http://10.32.1.169:5001/api/refermd", {docno: e})
+
+    if (result.data.success)
+    {
+       this.ReloadAllData()
+    }
+    else
+    {
+      Sweet.fire(
+        'ผิดพลาด!',
+        'ERROR : ' + result.data.error + ' กรุณาลองใหม่อีกครั้ง!',
+        'error'
+      )
+    }
   }
 
   //เลือกเมนูค้นหา
   onSelectSearchMenu = e => {
-    // console.log("select menu: ", e)
+    console.log("select menu: ", e)
     this.setState({ value: e })
   }
   
@@ -469,22 +654,30 @@ class Recfirm extends Component
           title: 'Docno',
           dataIndex: 'docno',
           render: (docno, record) => (
-            <p style={{ fontSize: '13px', color:'green', fontWeight:'bold', paddingTop:'13px' }}>
+            <p style={{ fontSize: '13px', color:'green', fontWeight:'bold', paddingTop:'13px', textAlign : 'center' }}>
               {docno}
             </p>
           )
         }, {
           title: 'Date',
           dataIndex: 'date',
-          width: '12%',
+          width: '10%',
           render: (date, record) => (
-            <p style={{ fontSize: '14px', color:'red', fontWeight:'bold', paddingTop:'13px' }}>
+            <p style={{ fontSize: '14px', color:'red', fontWeight:'bold', paddingTop:'13px', textAlign : 'center' }}>
               {date}
             </p>
           )
         }, {
           title: 'Time',
           dataIndex: 'time',
+          render(text, record) {
+            return {
+              props: {
+                style: { textAlign : 'center'}
+              },
+              children: <div>{text}</div>
+            };
+          }
         }, {
           title: 'ประเภทเอกสาร',
           dataIndex: 'type',
@@ -500,6 +693,19 @@ class Recfirm extends Component
           title: 'พนักงานขาย',
           dataIndex: 'sname',
         }, {
+          titel: 'Action',
+          dataIndex: '',
+          width: '8%',
+          render: (record) => (
+            <div>
+               <Dropdown overlay={() => this.DropDownItem(record.docno)}>
+                  <Button>
+                    เลือก <BiDotsHorizontal />
+                  </Button>
+              </Dropdown>
+         </div>
+          )
+        }, {
           title: '',
           dataIndex: '',
           width: '10%',
@@ -509,42 +715,26 @@ class Recfirm extends Component
         }, {
           title: '',
           dataIndex: '',
-          width: '13%',
-          render: () => <Button color="danger"><CloseOutlined /> ไม่อนุมัติ</Button>,
-        },{
-          titel: 'Action',
-          dataIndex: '',
-          render: (record) => (
-            <div>
-              <Button color="warning" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/edit/" + this.state.docno) : 
-              Sweet.fire({
-                icon: 'error',
-                title: 'ผิดพลาด',
-                text: 'โปรดเลือกรายการเพื่อเเก้ไข!',
-              })
-          }>แก้ไข</Button>
-            <Button style={{ marginLeft: 5 }} color="danger" onClick={ this.DelDocument }>ลบ</Button>
-            <Button style={{ marginLeft: 5 }} color="info" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/report/" + this.state.docno) : 
-                  Sweet.fire({
-                    icon: 'error',
-                    title: 'ผิดพลาด',
-                    text: 'โปรดเลือกรายการก่อนพิมพ์!',
-                  })
-              }><PrinterOutlined /> พิมพ์</Button>
-         </div>
-          // <Button style={{ marginLeft: 5 }} color="danger" onClick={ this.DelDocument }>ลบ</Button>
-    
-          )
-        }, this.state.pfs_id === '42494' ? 
-        {
+          width: '10%',
+          render: () => <Button color="danger"><BiDislike /> ไม่อนุมัติ</Button>,
+        }, this.state.pfs_id === '42494' ? {
           title: '',
           dataIndex: '',
           width: '15%',
           render: (record) => 
-            <Button color="primary"><BellOutlined /> ส่งต่อกรรมการ</Button>,
+
+              this.state.recfirm.map(v => {
+                    if (v.docno === record.docno) 
+                    { 
+                        if (v.showbtn === 1)
+                        {
+                          return  <Button color="primary" onClick={() => this.referMgrDirect(record.docno)}><BiPaperPlane /> ส่งต่อกรรมการ</Button>
+                        }  
+                    }
+              })
         }
         :
-        {}  
+        []
       ];
 
         //ตารางหลัก
@@ -622,16 +812,34 @@ class Recfirm extends Component
 
                   if ( row.docno === v.docno)
                   {
-                      return (
-                        <Steps direction="horizontal" size="small" current={v.current_pos}> 
-                          <Step title="Finished" description="ผู้รับออเดอร์" />
-                          <Step title={v.pos2} description="ผจก.แผนกขาย" />
-                          <Step title={v.pos3} description="ผจก.ฝ่ายขาย" />
-                          <Step title={v.pos4} description="ผจก.แผนกผลิตภัณฑ์" />
-                          <Step title={v.pos5} description="ผจก.ฝ่ายผลิตภัณฑ์" />
-                          <Step title={v.pos6} description="ผจก.แผนกการเงิน" />
-                        </Steps>
-                        )
+
+                     if (v.totapprv === 6)
+                     {
+                        return (
+                            <Steps direction="horizontal" size="small" current={v.current_pos}> 
+                              <Step title="Finished" description="ผู้รับออเดอร์" />
+                              <Step title={v.pos2} description="ผจก.แผนกขาย" />
+                              <Step title={v.pos3} description="ผจก.ฝ่ายขาย" />
+                              <Step title={v.pos4} description="ผจก.แผนกผลิตภัณฑ์" />
+                              <Step title={v.pos5} description="ผจก.ฝ่ายผลิตภัณฑ์" />
+                              <Step title={v.pos6} description="ผจก.แผนกการเงิน" />
+                            </Steps>
+                          )
+                     }
+                     else
+                     {
+                          return (
+                              <Steps direction="horizontal" size="small" current={v.current_pos}> 
+                                <Step title="Finished" description="ผู้รับออเดอร์" />
+                                <Step title={v.pos2} description="ผจก.แผนกขาย" />
+                                <Step title={v.pos3} description="ผจก.ฝ่ายขาย" />
+                                <Step title={v.pos4} description="ผจก.แผนกผลิตภัณฑ์" />
+                                <Step title={v.pos5} description="ผจก.ฝ่ายผลิตภัณฑ์" />
+                                <Step title={v.pos7} description="รองกรรมการฯ" />
+                                <Step title={v.pos6} description="ผจก.แผนกการเงิน" />
+                              </Steps>
+                            )
+                     }
                   }
         
                 })}
@@ -663,38 +871,7 @@ class Recfirm extends Component
             style.fontSize = 12;
             return style;
           };
-
-          // const rowEvents = {
-          //   //เหตุการณ์คลิก Row
-          //   onClick: (e, row, rowIndex) => {
-          //     // console.log("Rows Index --->", rowIndex)
-          //     _docno = row.docno;
-          //   }
-          // };
-
-          // //คลิกแถวที่เลือก
-          // const rowSelection = {
-          //   onChange: (selectedRowKeys, selectedRows) => {
-          //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-          //   },
-          //   onSelect: (record, selected, selectedRows) => {
-          //     // console.log(record, selected, selectedRows);
-          //     console.log("คลิก : ", record.docno, "selected: ", selected);
-          //     if (selected && record.docno !== '') 
-          //     {
-          //        this.setState({ docno: record.docno});
-          //     }
-          //     else{
-          //       console.log("ไม่ได้เลือก..")
-          //       this.setState({ id: '' });
-          //     }
-          //   },
-          //   onSelectAll: (selected, selectedRows, changeRows) => {
-          //     console.log("เลือกทั้งหมด")
-          //     // console.log(selected, selectedRows, changeRows);
-          //   },
-          // };
-
+          
         return(
          
             <div className="animated fadeIn">
@@ -722,15 +899,12 @@ class Recfirm extends Component
                                                     </Select>
                                                     <Search
                                                         placeholder="ระบุคำสืบค้น"
-                                                        onSearch={value => console.log(value)}
+                                                        onSearch={value => console.log("ค้นหาโดย : ", value)}
                                                         style={{ width: 200 }}
                                                     />
                                                   </Form.Item>
                                                 </Input.Group>    
                                             </Col>
-                                            {/* <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                                                <Button style={{ marginLeft: 3 }} color="info">พิมพ์</Button>
-                                            </Col>              */}
                                         </Row>
                                         <Row style={{ marginTop: 10 }}>
                                             <Col>
@@ -758,7 +932,7 @@ class Recfirm extends Component
                             </TabPane>
                             <TabPane tab={<p>รอเซ็นต์อนุมัติ <Badge count={this.state.count_wait} /></p>} key="2"> 
                                <Card>
-                                  <CardHeader style={{ backgroundColor: 'rgb(194, 214, 214)' }}></CardHeader>  
+                                  <CardHeader style={{ backgroundColor: 'rgb(194, 214, 214)', color:'blue' }}><BiFolderOpen style={{ color:'black' }}/> ใบเปิด ORDER</CardHeader> 
                                   <CardBody >
                                   {
                                      this.state.haveDt === '1' ?
@@ -783,23 +957,6 @@ class Recfirm extends Component
                                               </Form.Item>
                                             </Input.Group>    
                                         </Col>
-                                        <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                                            <Button color="warning" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/edit/" + this.state.docno) : 
-                                              Sweet.fire({
-                                                icon: 'error',
-                                                title: 'ผิดพลาด',
-                                                text: 'โปรดเลือกรายการเพื่อเเก้ไข!',
-                                              })
-                                           }>แก้ไข</Button>
-                                            <Button style={{ marginLeft: 5 }} color="danger" onClick={ this.DelDocument }>ลบ</Button>
-                                            <Button style={{ marginLeft: 5 }} color="info" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/report/" + this.state.docno) : 
-                                              Sweet.fire({
-                                                icon: 'error',
-                                                title: 'ผิดพลาด',
-                                                text: 'โปรดเลือกรายการก่อนพิมพ์!',
-                                              })
-                                          }><PrinterOutlined /> พิมพ์</Button>
-                                        </Col>
                                       </Row>
                                       <Row style={{ marginTop: 10 }}>
                                         <Col>
@@ -807,10 +964,6 @@ class Recfirm extends Component
                                                 bordered
                                                 columns={ waiting_approv }
                                                 dataSource={ this.state.data_waiting }
-                                                // rowSelection={{ 
-                                                //   type: 'radio',
-                                                //   ...rowSelection
-                                                //  }}
                                             />
                                         </Col>
                                       </Row>
@@ -827,7 +980,7 @@ class Recfirm extends Component
                             </TabPane> 
                             <TabPane tab={<p>เซ็นต์อนุมัติแล้ว <Badge className="site-badge-count-109" count={this.state.count_singed} style={{ backgroundColor: '#52c41a' }} /> </p>} key="3"> 
                             <Card>
-                                  <CardHeader style={{ backgroundColor: 'rgb(194, 214, 214)' }}></CardHeader>  
+                                  <CardHeader style={{ backgroundColor: 'rgb(194, 214, 214)', color:'blue' }}><BiFolderOpen style={{ color:'black' }}/> ใบเปิด ORDER</CardHeader> 
                                   <CardBody >
                                   {
                                      this.state.haveDt === '1' ?
@@ -852,16 +1005,6 @@ class Recfirm extends Component
                                               </Form.Item>
                                             </Input.Group>    
                                         </Col>
-                                        {/* <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                                            <Button style={{ marginLeft: 5 }} color="danger"><DeleteOutlined style={{ marginBottom: 3 }} /> ลบรายการ</Button>
-                                            <Button style={{ marginLeft: 5 }} color="info" onClick={()=> this.state.docno !== '' ? this.props.history.push("/main/report/" + this.state.docno) : 
-                                              Sweet.fire({
-                                                icon: 'error',
-                                                title: 'ผิดพลาด',
-                                                text: 'โปรดเลือกรายการ ก่อนพิมพ์!',
-                                              })
-                                          }><PrinterOutlined /> พิมพ์</Button>
-                                        </Col> */}
                                       </Row>
                                       <Row style={{ marginTop: 10 }}>
                                         <Col>
@@ -869,10 +1012,6 @@ class Recfirm extends Component
                                                 bordered
                                                 columns={ approved }
                                                 dataSource={ this.state.data_signed }
-                                                // rowSelection= {{ 
-                                                //   type: 'radio',
-                                                //   ...rowSelection
-                                                //  }} 
                                             />
                                         </Col>
                                       </Row>

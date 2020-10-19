@@ -95,19 +95,6 @@ class AeRecfirm extends Component
         this.setState(myState);
     }
 
-    // handleDocdateChange = date => {
-    //     this.setState({
-    //       docdate: date
-    //     });
-    //   };
-
-    //   handleSndDateChange = date => {
-    //     //handleSndDateChange
-    //     this.setState({
-    //       snddate: date
-    //     });
-    //   };
-
     async handleDelBtn(val)
     {
         const [name, pfs_id, pos] = Cookies.get("person").split("/")
