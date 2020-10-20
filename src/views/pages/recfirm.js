@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // import 'antd/dist/antd.css';
 import { Steps, Badge, Tabs, Input, Form, Select, Table, Dropdown, Menu } from 'antd';
-import { CaretDownOutlined, CaretUpOutlined, CloseOutlined, PrinterOutlined, BellOutlined } from '@ant-design/icons';
+import { CaretDownOutlined, CaretUpOutlined, PrinterOutlined } from '@ant-design/icons';
 import {
   Card,
   CardHeader,
@@ -16,7 +16,8 @@ import moment from 'moment';
 import Cookies from "js-cookie";
 import Sweet from 'sweetalert2';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import { BiFolderOpen, BiCheckCircle, BiChevronDownSquare, BiEditAlt, BiPrinter, BiEraser,BiPaperPlane, BiDislike, BiDotsHorizontal } from 'react-icons/bi';
+import { BiFolderOpen, BiCheckCircle, BiEditAlt, BiPrinter, BiEraser,BiPaperPlane, BiDislike, BiDotsHorizontal } from 'react-icons/bi';
+import { value } from 'numeral';
 
 const { TabPane } = Tabs;
 
@@ -24,8 +25,11 @@ class Recfirm extends Component
 {
     state = {
         recfirm: [],
+        filter_recfirm: [],
         data_waiting: [],
+        filter_waiting: [],
         data_signed:[],
+        filter_signed: [],
         haveDt: '',
         docno: "",
         count_all:0,
@@ -33,6 +37,9 @@ class Recfirm extends Component
         count_singed:0,
         sign_pos: '',
         pfs_id: '',
+        fieldSearch: '',
+        searchTxt: '',
+        blnSearch: 0,
     };
 
     //sign_pos คือ ตำแหน่งที่ user คนนั้นต้องเซ็นต์ 
@@ -159,7 +166,7 @@ class Recfirm extends Component
       result.data.data_person && result.data.data_person.map((v, index) => {
 
             j =j + 1
-
+            console.log("99 ", v.code)
             data_p.push({
                key: index,
                date: moment(v.date).format("DD-MM-YYYY"),
@@ -168,6 +175,7 @@ class Recfirm extends Component
                type: v.doctype,
                cname: v.custname,
                sname: v.sname, 
+               code: v.code,
             })
       })
 
@@ -187,11 +195,134 @@ class Recfirm extends Component
             type: v.title,
             cname: v.custname,
             sname: v.saleman + ' ' + v.sname, 
+            code: v.code
          })
       })
 
       this.setState({ recfirm: data, count_all: i, data_waiting: data_p, count_wait: j, data_signed: data_ap, count_singed: k });
     }
+  }
+
+  onChangeInput = async (e, act) => {
+    // console.log("คำสืบค้น : ", e)
+    // console.log("Tab : ", act)
+    this.setState({ searchTxt: e });
+
+    if (e === '') 
+    {
+        this.setState({ blnSearch : 0, filter_recfirm: [], filter_waiting: [], filter_signed: [] })
+    } 
+    else
+    {
+      this.findData(e, act)
+    }
+  }
+
+  findData = async(val, tab) => {
+    //  console.log("ค่าที่ค้นหา ->", val);
+    if ((tab === '1') && (this.state.fieldSearch !== '')) //เอกสารทั้งหมด
+    { 
+            if (this.state.recfirm.length > 0)
+            {
+              let myData = [];
+              let source = this.state.recfirm;
+
+              this.state.fieldSearch === 'code' ?
+ 
+                  myData = source.filter(function(item){
+                            return item.code.includes(val.toUpperCase()) //item.code == val
+                            }).map(function({date, no, docno, desc, sign1, sign1_date, sign2, sign2_date, sign3, sign3_date, sign4, sign4_date, sign5, sign5_date, sign6, sign6_date, code, name, sale, prod, doctype, time, remark, progress, pos2, pos3, pos4, pos5, pos6, pos7, totapprv, showbtn,current_pos}){
+                                return {date, no, docno, desc, sign1, sign1_date, sign2, sign2_date, sign3, sign3_date, sign4, sign4_date, sign5, sign5_date, sign6, sign6_date, code, name, sale, prod, doctype, time, remark, progress, pos2, pos3, pos4, pos5, pos6, pos7, totapprv, showbtn,current_pos};
+                        })
+                : 
+             
+                myData = source.filter(function(item){
+                      return item.sale.includes(val) //item.sale == val
+                      }).map(function({date, no, docno, desc, sign1, sign1_date, sign2, sign2_date, sign3, sign3_date, sign4, sign4_date, sign5, sign5_date, sign6, sign6_date, code, name, sale, prod, doctype, time, remark, progress, pos2, pos3, pos4, pos5, pos6, pos7, totapprv, showbtn,current_pos}){
+                          return {date, no, docno, desc, sign1, sign1_date, sign2, sign2_date, sign3, sign3_date, sign4, sign4_date, sign5, sign5_date, sign6, sign6_date, code, name, sale, prod, doctype, time, remark, progress, pos2, pos3, pos4, pos5, pos6, pos7, totapprv, showbtn,current_pos};
+                  })
+
+              this.setState({ blnSearch: 1 ,filter_recfirm: myData });
+            }
+            else
+            {
+              console.log("Emptydata recfirm")
+            }
+    }
+    else if ((tab === '2') && (this.state.fieldSearch !== '')) //เอกสารรายบุคคล
+    {
+      if (this.state.data_waiting.length > 0)
+      {
+        let myData = [];
+        let source = this.state.data_waiting;
+
+        if (this.state.fieldSearch === 'code') //ค้นหาด้วย code
+        {
+            myData = source.filter(function(item){
+              return item.code.includes(val.toUpperCase()) //item.code == val
+              }).map(function({key, date, time, docno, type, cname, sname, code}){
+                  return {key, date, time, docno, type, cname, sname, code};
+          })
+        }
+        else if (this.state.fieldSearch === 'custname') //ชื่อร้านค้า
+        {
+              myData = source.filter(function(item){
+                return item.cname.includes(val.toUpperCase()) //item.code == val
+                }).map(function({key, date, time, docno, type, cname, sname, code}){
+                    return {key, date, time, docno, type, cname, sname, code};
+            })
+        }
+        else
+        {
+              myData = source.filter(function(item){
+                return item.sname.includes(val.toUpperCase()) //item.code == val
+                }).map(function({key, date, time, docno, type, cname, sname, code}){
+                    return {key, date, time, docno, type, cname, sname, code};
+            })
+        }
+
+        this.setState({ blnSearch: 1 ,filter_waiting: myData });
+      }
+    }
+    else if ((tab === '3') && (this.state.fieldSearch !== ''))  //tab == 3 เซ็นไปแล้ว
+    {
+      if (this.state.data_signed.length > 0)
+      {
+        let myData = [];
+        let source = this.state.data_signed;
+
+        if (this.state.fieldSearch === 'code') //ค้นหาด้วย code
+        {
+            myData = source.filter(function(item){
+
+              return item.code.includes(val.toUpperCase()) //item.code == val
+              }).map(function({key, date, time, docno, type, cname, sname, code}){
+                  return {key, date, time, docno, type, cname, sname, code};
+          })
+        }
+        else if (this.state.fieldSearch === 'custname') //ชื่อร้านค้า
+        {
+              myData = source.filter(function(item){
+
+                return item.cname.includes(val.toUpperCase()) //item.code == val
+                }).map(function({key, date, time, docno, type, cname, sname, code}){
+                    return {key, date, time, docno, type, cname, sname, code};
+            })
+        }
+        else
+        {
+              myData = source.filter(function(item){
+
+                return item.sname.includes(val.toUpperCase()) //item.code == val
+                }).map(function({key, date, time, docno, type, cname, sname, code}){
+                    return {key, date, time, docno, type, cname, sname, code};
+            })
+        }
+
+        this.setState({ blnSearch: 1 ,filter_signed: myData });
+      }
+    }
+     
   }
 
   callback = key => 
@@ -228,6 +359,7 @@ class Recfirm extends Component
                type: v.title,
                cname: v.custname,
                sname: v.saleman + ' ' + v.sname, 
+               code: v.code,
             })
         })
 
@@ -275,7 +407,6 @@ class Recfirm extends Component
 
   DropDownItem(value)
   {
-
     const menu = (
       <Menu onClick={(e) => this.handleMenuClick(e, value)}>
         <Menu.Item key="1" icon={<BiEditAlt />}>
@@ -366,6 +497,7 @@ class Recfirm extends Component
 
 
   SignApprove = (e) => {
+
         Sweet.fire({
               title: 'Approval Confirmation?',
               text: "คุณต้องการอนุมัติเอกสาร ใช่หรือไม่",
@@ -458,6 +590,7 @@ class Recfirm extends Component
                  type: v.doctype,
                  cname: v.custname,
                  sname: v.sname, 
+                 code: v.code,
               })
           })
 
@@ -564,7 +697,7 @@ class Recfirm extends Component
              k = k + 1;
           })
 
-          this.setState({ data_waiting: data, count_wait: i, recfirm: data2, count_all: k })
+          this.setState({ data_waiting: data, count_wait: i, recfirm: data2, count_all: k, fieldSearch: '', blnSearch: 0, searchTxt: '' })
        }
   }
 
@@ -588,8 +721,7 @@ class Recfirm extends Component
 
   //เลือกเมนูค้นหา
   onSelectSearchMenu = e => {
-    console.log("select menu: ", e)
-    this.setState({ value: e })
+    this.setState({ fieldSearch : e })
   }
   
     render() {
@@ -635,6 +767,9 @@ class Recfirm extends Component
         }, {
           title: 'ประเภทเอกสาร',
           dataIndex: 'type',
+        }, {
+          title: 'CODE',
+          dataIndex: 'code',
         }, {
           title: 'ร้านค้า',
           dataIndex: 'cname',
@@ -686,6 +821,9 @@ class Recfirm extends Component
               {type}
             </p>
           )
+        }, {
+          title: 'CODE',
+          dataIndex: 'code',
         }, {
           title: 'ร้านค้า',
           dataIndex: 'cname',
@@ -800,8 +938,7 @@ class Recfirm extends Component
               onClick: (e, column, columnIndex, row, rowIndex) => {
                 e.stopPropagation(); //ไม่ให้ expand row
               },
-            },
-            classes: "p-1"
+            }
           }];
 
        const expandRow = {
@@ -893,14 +1030,16 @@ class Recfirm extends Component
                                                       noStyle
                                                       rules={[{ required: true, message: '' }]}
                                                     >
-                                                    <Select placeholder="All Documents" onSelect={this.onSelectSearchMenu}>
+                                                    <Select placeholder="กรุณาเลือก" onSelect={this.onSelectSearchMenu}>
                                                         <Option value="sale">รหัสเซล</Option>
                                                         <Option value="code">CODE</Option>
                                                     </Select>
                                                     <Search
                                                         placeholder="ระบุคำสืบค้น"
-                                                        onSearch={value => console.log("ค้นหาโดย : ", value)}
+                                                        onSearch={value => this.findData(value, '1')}
+                                                        onChange={e => this.onChangeInput(e.target.value, '1')}
                                                         style={{ width: 200 }}
+                                                        value={ this.state.searchTxt }
                                                     />
                                                   </Form.Item>
                                                 </Input.Group>    
@@ -908,14 +1047,15 @@ class Recfirm extends Component
                                         </Row>
                                         <Row style={{ marginTop: 10 }}>
                                             <Col>
-                                                <BootstrapTable
+                                                <BootstrapTable 
                                                     keyField='no'
-                                                    data={ this.state.recfirm }
+                                                    data={this.state.blnSearch === 0 ? this.state.recfirm : this.state.filter_recfirm}
                                                     columns={ columns }
                                                     expandRow={ expandRow }
                                                     rowStyle={ rowStyle }
                                                     pagination={paginationFactory()}
                                                     hover
+                                                    wrapperClasses="table-responsive"
                                                 />
                                           </Col>
                                         </Row>
@@ -941,18 +1081,21 @@ class Recfirm extends Component
                                         <Col>
                                             <Input.Group compact>
                                               <Form.Item
-                                                name={['sale', 'code']}
+                                                name={['code', 'custname', 'sale']}
                                                 noStyle
                                                 rules={[{ required: true, message: '' }]}
-                                                >
-                                                <Select placeholder="All Documents" onSelect={this.onSelectSearchMenu}>
-                                                    <Option value="sale">รหัสเซล</Option>
+                                              >
+                                                <Select placeholder="กรุณาเลือก" onSelect={this.onSelectSearchMenu}>
                                                     <Option value="code">CODE</Option>
+                                                    <Option value="custname">ชื่อร้านค้า</Option>
+                                                    <Option value="sale">รหัสเซล</Option>
                                                 </Select>
                                                 <Search
                                                     placeholder="ระบุคำสืบค้น"
-                                                    onSearch={value => console.log(value)}
+                                                    onSearch={value => this.findData(value, '2')}
+                                                    onChange={e => this.onChangeInput(e.target.value, '2')}
                                                     style={{ width: 200 }}
+                                                    value={ this.state.searchTxt }
                                                 />
                                               </Form.Item>
                                             </Input.Group>    
@@ -963,7 +1106,7 @@ class Recfirm extends Component
                                             <Table
                                                 bordered
                                                 columns={ waiting_approv }
-                                                dataSource={ this.state.data_waiting }
+                                                dataSource={ this.state.blnSearch === 0 ? this.state.data_waiting : this.state.filter_waiting }
                                             />
                                         </Col>
                                       </Row>
@@ -988,19 +1131,22 @@ class Recfirm extends Component
                                       <Row>
                                         <Col>
                                             <Input.Group compact>
-                                              <Form.Item
-                                                name={['sale', 'code']}
+                                            <Form.Item
+                                                name={['code', 'custname', 'sale']}
                                                 noStyle
                                                 rules={[{ required: true, message: '' }]}
-                                                >
-                                                <Select placeholder="All Documents" onSelect={this.onSelectSearchMenu}>
-                                                    <Option value="sale">รหัสเซล</Option>
+                                              >
+                                                <Select placeholder="กรุณาเลือก" onSelect={this.onSelectSearchMenu}>
                                                     <Option value="code">CODE</Option>
+                                                    <Option value="custname">ชื่อร้านค้า</Option>
+                                                    <Option value="sale">รหัสเซล</Option>
                                                 </Select>
                                                 <Search
                                                     placeholder="ระบุคำสืบค้น"
-                                                    onSearch={value => console.log(value)}
+                                                    onSearch={value => this.findData(value, '3')}
+                                                    onChange={e => this.onChangeInput(e.target.value, '3')}
                                                     style={{ width: 200 }}
+                                                    value={ this.state.searchTxt }
                                                 />
                                               </Form.Item>
                                             </Input.Group>    
@@ -1008,10 +1154,10 @@ class Recfirm extends Component
                                       </Row>
                                       <Row style={{ marginTop: 10 }}>
                                         <Col>
-                                            <Table //className={tbstyle}
+                                            <Table 
                                                 bordered
                                                 columns={ approved }
-                                                dataSource={ this.state.data_signed }
+                                                dataSource={ this.state.blnSearch === 0 ? this.state.data_signed : this.state.filter_signed  }
                                             />
                                         </Col>
                                       </Row>

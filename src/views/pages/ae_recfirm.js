@@ -29,7 +29,7 @@ class AeRecfirm extends Component
  {
    //[2,3,4,5,6] คือ Array
    //{1,2,3,4,5} คือ Object
-   //array of objects
+   //[{a: '1', b:'1'}, {a: '2', b:'2'}]  คือ array of objects
    //ถ้้า setState หลายครั้ง จะ render หลายครั้งตามไปด้วย
 
     state = {
@@ -104,7 +104,6 @@ class AeRecfirm extends Component
 
         if (result.data.success)
         {
-
             let dt = [];
 
                 //Transection
@@ -142,7 +141,7 @@ class AeRecfirm extends Component
 
         //ส่ง state ได้ผ่าน arrow function only
         const [name, pfs_id, pos] = Cookies.get("person").split("/")
-        let result = await Axios.post("http://10.32.1.169:5001/api/update", { docno: _docno, pfs_id: pfs_id, header: this.state.head }) 
+        let result = await Axios.post("http://10.32.1.169:5001/api/update", { docno: _docno, pfs_id: pfs_id, header: this.state.head, detail: this.state.detail }) 
         
         if (result.data.success)
         {
